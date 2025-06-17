@@ -8,9 +8,10 @@ export interface SearchMoviesParams {
   genre?: string;
   sort_by?: string;
   quality?: string;
-  minimum_rating?: number; // Changed from string to number for consistency with API
+  minimum_rating?: number;
   limit?: number;
   page?: number;
+  year_query?: string; // New parameter for specific year query
 }
 
 // Helper function to de-duplicate movies by ID
@@ -30,8 +31,18 @@ function deduplicateMoviesById(movies: Movie[]): Movie[] {
 
 export async function searchMovies(params: SearchMoviesParams = {}): Promise<YTSListMoviesResponse['data']> {
   const queryParams = new URLSearchParams();
+  let effectiveQueryTerm = params.query_term;
+
+  // If sorting by year and a specific year_query is provided, use it as the main query_term
+  if (params.sort_by === 'year' && params.year_query) {
+    const yearNum = parseInt(params.year_query, 10);
+    // Basic validation for a 4-digit year
+    if (!isNaN(yearNum) && params.year_query.length === 4) {
+      effectiveQueryTerm = params.year_query; // Year query takes precedence
+    }
+  }
   
-  if (params.query_term) queryParams.append('query_term', params.query_term);
+  if (effectiveQueryTerm) queryParams.append('query_term', effectiveQueryTerm);
   
   if (params.genre && params.genre !== 'all') queryParams.append('genre', params.genre);
   
@@ -55,7 +66,6 @@ export async function searchMovies(params: SearchMoviesParams = {}): Promise<YTS
     if (data.status !== 'ok') {
       throw new Error(`YTS API error: ${data.status_message}`);
     }
-    // De-duplicate movies before returning
     if (data.data && data.data.movies) {
       data.data.movies = deduplicateMoviesById(data.data.movies);
     }
@@ -106,7 +116,6 @@ export async function getMovieSuggestions(movie_id: number): Promise<Movie[]> {
     if (data.status !== 'ok') {
       throw new Error(`YTS API error: ${data.status_message}`);
     }
-    // De-duplicate movies before returning
     let suggestedMovies = data.data.movies || [];
     if (suggestedMovies.length > 0) {
       suggestedMovies = deduplicateMoviesById(suggestedMovies);

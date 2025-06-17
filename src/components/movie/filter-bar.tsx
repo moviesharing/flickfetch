@@ -2,6 +2,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -9,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 const qualityOptions = [
@@ -75,42 +77,99 @@ interface FilterDefinition {
   defaultValue: string;
 }
 
-const filters: FilterDefinition[] = [
+// General filters (excluding sort_by, which is handled specially)
+const generalFilters: FilterDefinition[] = [
   { paramName: 'quality', label: 'Quality:', options: qualityOptions, defaultValue: 'all' },
   { paramName: 'genre', label: 'Genre:', options: genreOptions, defaultValue: 'all' },
   { paramName: 'minimum_rating', label: 'Rating:', options: ratingOptions, defaultValue: '0' },
-  { paramName: 'sort_by', label: 'Order By:', options: sortByOptions, defaultValue: 'download_count' },
 ];
 
 export default function FilterBar() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const handleFilterChange = (paramName: string, value: string) => {
+  const currentSortBy = searchParams.get('sort_by') || 'download_count';
+  const currentYearQuery = searchParams.get('year_query') || '';
+  const [yearInputValue, setYearInputValue] = useState(currentYearQuery);
+
+  useEffect(() => {
+    // Sync year input value if URL changes externally
+    setYearInputValue(searchParams.get('year_query') || '');
+  }, [searchParams]);
+
+  const handleGeneralFilterChange = (paramName: string, value: string) => {
     const current = new URLSearchParams(Array.from(searchParams.entries()));
     
-    if (value === 'all' || (paramName === 'minimum_rating' && value === '0') || (paramName === 'sort_by' && value === 'download_count' && !current.get('query_term'))) {
+    // Default value conditions for removal
+    const isDefaultQuality = paramName === 'quality' && value === 'all';
+    const isDefaultGenre = paramName === 'genre' && value === 'all';
+    const isDefaultRating = paramName === 'minimum_rating' && value === '0';
+
+    if (isDefaultQuality || isDefaultGenre || isDefaultRating) {
       current.delete(paramName);
     } else {
       current.set(paramName, value);
     }
     
-    // Reset page to 1 when filters change
     current.delete('page');
-
     const search = current.toString();
-    const query = search ? `?${search}` : '';
-    router.push(`/${query}`);
+    const queryPath = search ? `?${search}` : '';
+    router.push(`/${queryPath}`);
   };
 
+  const handleSortByChange = (value: string) => {
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    
+    if (value === 'download_count' && !current.get('query') && !current.get('year_query')) {
+      current.delete('sort_by');
+    } else {
+      current.set('sort_by', value);
+    }
+
+    if (value !== 'year') {
+      current.delete('year_query');
+      setYearInputValue(''); 
+    }
+    
+    current.delete('page');
+    const search = current.toString();
+    const queryPath = search ? `?${search}` : '';
+    router.push(`/${queryPath}`);
+  };
+
+  const handleYearInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setYearInputValue(e.target.value);
+  };
+
+  const handleYearInputSubmit = () => {
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    const yearVal = yearInputValue.trim();
+
+    if (yearVal && /^\d{4}$/.test(yearVal)) {
+      current.set('year_query', yearVal);
+      current.set('sort_by', 'year'); // Ensure sort_by is year
+      current.delete('query'); // Year query overrides general text query from main search bar
+    } else {
+      current.delete('year_query');
+      // If year input is cleared but sort_by was 'year', it just sorts by year generally.
+      // No need to change sort_by here as it's handled by its own dropdown.
+      // If yearVal is empty and user explicitly set sort_by to 'year', it will sort all movies by year.
+    }
+    current.delete('page');
+    const search = current.toString();
+    const queryPath = search ? `?${search}` : '';
+    router.push(`/${queryPath}`);
+  };
+
+
   return (
-    <div className="my-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
-      {filters.map(filter => (
+    <div className="my-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-end">
+      {generalFilters.map(filter => (
         <div key={filter.paramName} className="space-y-1.5">
           <Label htmlFor={filter.paramName} className="text-sm font-medium text-muted-foreground">{filter.label}</Label>
           <Select
             value={searchParams.get(filter.paramName) || filter.defaultValue}
-            onValueChange={(value) => handleFilterChange(filter.paramName, value)}
+            onValueChange={(value) => handleGeneralFilterChange(filter.paramName, value)}
           >
             <SelectTrigger id={filter.paramName} className="w-full rounded-lg shadow-sm">
               <SelectValue placeholder={`Select ${filter.label.replace(':','')}`} />
@@ -125,6 +184,49 @@ export default function FilterBar() {
           </Select>
         </div>
       ))}
+
+      {/* Sort By Filter */}
+      <div className="space-y-1.5">
+        <Label htmlFor="sort_by_select" className="text-sm font-medium text-muted-foreground">Order By:</Label>
+        <Select
+          value={currentSortBy}
+          onValueChange={handleSortByChange}
+        >
+          <SelectTrigger id="sort_by_select" className="w-full rounded-lg shadow-sm">
+            <SelectValue placeholder="Order By" />
+          </SelectTrigger>
+          <SelectContent>
+            {sortByOptions.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      {/* Conditional Year Input */}
+      {currentSortBy === 'year' && (
+        <div className="space-y-1.5"> {/* This will flow into the grid */}
+          <Label htmlFor="year_query_input" className="text-sm font-medium text-muted-foreground">Specific Year:</Label>
+          <Input
+            id="year_query_input"
+            type="text" 
+            placeholder="YYYY"
+            value={yearInputValue}
+            onChange={handleYearInputChange}
+            onBlur={handleYearInputSubmit}
+            onKeyDown={(e) => { 
+              if (e.key === 'Enter') { 
+                e.preventDefault(); 
+                handleYearInputSubmit(); 
+              }
+            }}
+            maxLength={4}
+            className="w-full rounded-lg shadow-sm"
+          />
+        </div>
+      )}
     </div>
   );
 }

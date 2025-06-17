@@ -2,7 +2,7 @@
 import Container from '@/components/layout/container';
 import MovieList from '@/components/movie/movie-list';
 import SearchBar from '@/components/movie/search-bar';
-import FilterBar from '@/components/movie/filter-bar'; // Added FilterBar import
+import FilterBar from '@/components/movie/filter-bar';
 import { searchMovies, SearchMoviesParams } from '@/lib/yts';
 import { Separator } from '@/components/ui/separator';
 import { Suspense } from 'react';
@@ -17,6 +17,7 @@ interface HomePageProps {
     genre?: string;
     minimum_rating?: string;
     sort_by?: string;
+    year_query?: string; // Added for specific year query
   };
 }
 
@@ -37,7 +38,8 @@ async function MovieResults({
   quality, 
   genre, 
   minimum_rating, 
-  sort_by 
+  sort_by,
+  year_query, // Added for specific year query
 }: { 
   query?: string; 
   page?: string;
@@ -45,6 +47,7 @@ async function MovieResults({
   genre?: string;
   minimum_rating?: string;
   sort_by?: string;
+  year_query?: string; // Added for specific year query
 }) {
   const currentPage = page ? parseInt(page, 10) : 1;
   
@@ -52,22 +55,26 @@ async function MovieResults({
     query_term: query,
     limit: MOVIES_PER_PAGE,
     page: currentPage,
+    year_query: year_query, // Pass year_query
   };
 
   if (quality && quality !== 'all') searchOptions.quality = quality;
   if (genre && genre !== 'all') searchOptions.genre = genre;
   if (minimum_rating) {
     const ratingNum = parseInt(minimum_rating, 10);
-    if (!isNaN(ratingNum) && ratingNum >= 0 && ratingNum <=9) { // YTS API uses 0-9
+    if (!isNaN(ratingNum) && ratingNum >= 0 && ratingNum <=9) {
       searchOptions.minimum_rating = ratingNum;
     }
   }
   
   // Determine sort_by:
-  // 1. Use sort_by from filter if present.
-  // 2. Else, if query term exists, use 'like_count'.
-  // 3. Else (no query, no filter sort_by), use 'download_count' (default for popular).
-  if (sort_by) {
+  // If year_query is present, sort_by is 'year' (set by FilterBar).
+  // Else, use sort_by from filter if present.
+  // Else, if query term exists, use 'like_count'.
+  // Else (no query, no filter sort_by), use 'download_count' (default for popular).
+  if (year_query && sort_by === 'year') {
+    searchOptions.sort_by = 'year'; // Already set by filter bar, but good to be explicit
+  } else if (sort_by) {
     searchOptions.sort_by = sort_by;
   } else if (query) {
     searchOptions.sort_by = 'like_count';
@@ -106,8 +113,25 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const genre = searchParams?.genre;
   const minimum_rating = searchParams?.minimum_rating;
   const sort_by = searchParams?.sort_by;
+  const year_query = searchParams?.year_query; // Read year_query
 
-  const hasFiltersApplied = quality || genre || (minimum_rating && minimum_rating !== '0') || (sort_by && sort_by !== 'download_count');
+  // Determine if any filters are actively applied, including the new year_query
+  const hasGeneralFilters = quality || genre || (minimum_rating && minimum_rating !== '0');
+  const hasSortFilter = sort_by && sort_by !== 'download_count'; // if default sort_by is not considered 'active filter' for title
+  const hasYearQueryFilter = sort_by === 'year' && year_query;
+  const hasFiltersApplied = hasGeneralFilters || hasSortFilter || hasYearQueryFilter;
+
+
+  // Determine results heading
+  let resultsTitle = "Popular Movies"; // Default
+  if (hasYearQueryFilter) {
+    resultsTitle = `Movies from ${year_query}`;
+  } else if (query) {
+    resultsTitle = `Search Results for "${query}"`;
+  } else if (hasFiltersApplied) { // Covers general filters or non-default sort
+    resultsTitle = "Filtered Movies";
+  }
+
 
   return (
     <Container className="py-6 md:py-10">
@@ -121,11 +145,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       </section>
 
       <SearchBar />
-      <FilterBar /> {/* Added FilterBar component */}
+      <FilterBar />
       
       <Separator className="my-8" />
 
-      {!query && !hasFiltersApplied && ( // Show Top Rated only if no search query and no filters are active
+      {/* Show Top Rated only if no search query and no filters (including year_query) are active */}
+      {!query && !hasFiltersApplied && (
         <>
           <section className="mb-10">
             <h2 className="text-2xl md:text-3xl font-semibold mb-6 font-headline">
@@ -149,7 +174,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       <section>
         <h2 className="text-2xl md:text-3xl font-semibold mb-6 font-headline">
-          {query ? `Search Results for "${query}"` : (hasFiltersApplied ? "Filtered Movies" : "Popular Movies")}
+          {resultsTitle}
         </h2>
         <Suspense fallback={
           <div className="flex flex-col justify-center items-center min-h-[300px]">
@@ -168,10 +193,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             genre={genre}
             minimum_rating={minimum_rating}
             sort_by={sort_by}
+            year_query={year_query} // Pass year_query
           />
         </Suspense>
       </section>
     </Container>
   );
 }
-
