@@ -1,0 +1,104 @@
+import type { YTSListMoviesResponse, YTSMovieDetailsResponse, Movie } from '@/types/yts';
+
+const YTS_API_BASE_URL = 'https://yts.mx/api/v2';
+
+interface SearchMoviesParams {
+  query_term?: string;
+  genre?: string;
+  sort_by?: string;
+  quality?: string;
+  minimum_rating?: number;
+  limit?: number;
+  page?: number;
+}
+
+export async function searchMovies(params: SearchMoviesParams = {}): Promise<YTSListMoviesResponse['data']> {
+  const queryParams = new URLSearchParams();
+  
+  if (params.query_term) queryParams.append('query_term', params.query_term);
+  if (params.genre) queryParams.append('genre', params.genre);
+  if (params.sort_by) queryParams.append('sort_by', params.sort_by);
+  else queryParams.append('sort_by', 'download_count'); // Default sort
+  if (params.quality) queryParams.append('quality', params.quality);
+  if (params.minimum_rating) queryParams.append('minimum_rating', params.minimum_rating.toString());
+  queryParams.append('limit', (params.limit || 20).toString());
+  queryParams.append('page', (params.page || 1).toString());
+
+  try {
+    const response = await fetch(`${YTS_API_BASE_URL}/list_movies.json?${queryParams.toString()}`);
+    if (!response.ok) {
+      throw new Error(`YTS API request failed: ${response.statusText}`);
+    }
+    const data: YTSListMoviesResponse = await response.json();
+    if (data.status !== 'ok') {
+      throw new Error(`YTS API error: ${data.status_message}`);
+    }
+    return data.data;
+  } catch (error) {
+    console.error('Error fetching movies from YTS:', error);
+    // Return a structure that indicates no movies or an error state
+    return { movies: [], movie_count: 0, limit: params.limit || 20, page_number: params.page || 1 };
+  }
+}
+
+interface GetMovieDetailsParams {
+  movie_id: number;
+  with_images?: boolean;
+  with_cast?: boolean;
+}
+
+export async function getMovieDetails(params: GetMovieDetailsParams): Promise<Movie | null> {
+  const queryParams = new URLSearchParams();
+  queryParams.append('movie_id', params.movie_id.toString());
+  if (params.with_images) queryParams.append('with_images', 'true');
+  if (params.with_cast) queryParams.append('with_cast', 'true');
+  
+  try {
+    const response = await fetch(`${YTS_API_BASE_URL}/movie_details.json?${queryParams.toString()}`);
+    if (!response.ok) {
+      throw new Error(`YTS API request failed: ${response.statusText}`);
+    }
+    const data: YTSMovieDetailsResponse = await response.json();
+     if (data.status !== 'ok' || !data.data.movie) {
+      throw new Error(`YTS API error: ${data.status_message} or movie not found.`);
+    }
+    return data.data.movie;
+  } catch (error) {
+    console.error(`Error fetching movie details for ID ${params.movie_id}:`, error);
+    return null;
+  }
+}
+
+export async function getMovieSuggestions(movie_id: number): Promise<Movie[]> {
+   const queryParams = new URLSearchParams();
+  queryParams.append('movie_id', movie_id.toString());
+  try {
+    const response = await fetch(`${YTS_API_BASE_URL}/movie_suggestions.json?${queryParams.toString()}`);
+    if (!response.ok) {
+      throw new Error(`YTS API request failed: ${response.statusText}`);
+    }
+    const data: YTSListMoviesResponse = await response.json(); // Suggestions endpoint has similar structure to list_movies
+    if (data.status !== 'ok') {
+      throw new Error(`YTS API error: ${data.status_message}`);
+    }
+    return data.data.movies || [];
+  } catch (error) {
+     console.error(`Error fetching movie suggestions for ID ${movie_id}:`, error);
+    return [];
+  }
+}
+
+export const DEFAULT_TRACKERS = [
+  'udp://tracker.opentrackr.org:1337/announce',
+  'udp://tracker.openbittorrent.com:6969/announce',
+  'udp://open.tracker.cl:1337/announce',
+  'udp://tracker.dler.org:6969/announce',
+  'udp://opentracker.i2p.rocks:6969/announce',
+  'udp://tracker.internetwarriors.net:1337/announce'
+];
+
+export function generateMagnetLink(hash: string, title: string, trackers: string[] = DEFAULT_TRACKERS): string {
+  const dn = encodeURIComponent(title);
+  const trs = trackers.map(tracker => `&tr=${encodeURIComponent(tracker)}`).join('');
+  return `magnet:?xt=urn:btih:${hash}&dn=${dn}${trs}`;
+}
