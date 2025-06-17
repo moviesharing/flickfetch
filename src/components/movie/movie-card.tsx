@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Movie } from '@/types/yts';
@@ -5,7 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { generateMovieSlug } from '@/lib/utils'; // Import the slug generator
+import { generateMovieSlug } from '@/lib/utils';
 
 interface MovieCardProps {
   movie: Movie;
@@ -13,11 +14,11 @@ interface MovieCardProps {
 }
 
 export default function MovieCard({ movie, disableHoverScale = false }: MovieCardProps) {
-  const slug = generateMovieSlug(movie.title, movie.year, movie.id);
+  const slug = generateMovieSlug(movie.title, movie.year); // Use title and year for slug
 
   return (
     <Link
-      href={`/movies/${slug}`} // Use the generated slug
+      href={`/movies/${slug}`}
       className={cn(
         "block group rounded-lg overflow-hidden focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background",
         !disableHoverScale && "animate-fade-in transform transition-all duration-300 hover:scale-105 focus:scale-105"
