@@ -5,7 +5,7 @@ import { getMovieDetails, getMovieSuggestions, searchMovies } from '@/lib/yts';
 import Container from '@/components/layout/container';
 import TorrentTable from '@/components/movie/torrent-table';
 import MovieList from '@/components/movie/movie-list';
-import SeoOptimizer from '@/components/movie/seo-optimizer';
+// Removed SeoOptimizer import
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Star, Clock, CalendarDays, Users, Languages } from 'lucide-react';
@@ -185,11 +185,12 @@ export default async function MovieDetailsPage({ params }: MovieDetailsPageProps
         <TorrentTable torrents={movie.torrents} movieTitle={movie.title_long} />
       </section>
 
-      <Separator className="my-8 md:my-12" />
+      {/* Removed SeoOptimizer section */}
+      {/* <Separator className="my-8 md:my-12" />
       
       <section className="mb-10">
         <SeoOptimizer movie={movie} />
-      </section>
+      </section> */}
 
       <Separator className="my-8 md:my-12" />
 
