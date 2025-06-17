@@ -16,6 +16,15 @@ interface HomePageProps {
 }
 
 const MOVIES_PER_PAGE = 24;
+const FEATURED_MOVIES_COUNT = 6;
+
+async function TopRatedMovies() {
+  const movieData = await searchMovies({ 
+    sort_by: 'rating', 
+    limit: FEATURED_MOVIES_COUNT 
+  });
+  return <MovieList movies={movieData.movies || []} itemsPerPage={FEATURED_MOVIES_COUNT} />;
+}
 
 async function MovieResults({ query, page }: { query?: string; page?: string }) {
   const currentPage = page ? parseInt(page, 10) : 1;
@@ -68,6 +77,21 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       
       <Separator className="my-8" />
 
+      <section className="mb-10">
+        <h2 className="text-2xl md:text-3xl font-semibold mb-6 font-headline">
+          Top Rated Movies
+        </h2>
+        <Suspense fallback={
+          <div className="flex flex-col justify-center items-center min-h-[200px]">
+            <MovieList loading={true} itemsPerPage={FEATURED_MOVIES_COUNT} />
+          </div>
+        }>
+          <TopRatedMovies />
+        </Suspense>
+      </section>
+
+      <Separator className="my-8" />
+
       <section>
         <h2 className="text-2xl md:text-3xl font-semibold mb-6 font-headline">
           {query ? `Search Results for "${query}"` : "Popular Movies"}
@@ -88,3 +112,4 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     </Container>
   );
 }
+
