@@ -4,16 +4,21 @@ import type { Movie } from '@/types/yts';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface MovieCardProps {
   movie: Movie;
+  disableHoverScale?: boolean;
 }
 
-export default function MovieCard({ movie }: MovieCardProps) {
+export default function MovieCard({ movie, disableHoverScale = false }: MovieCardProps) {
   return (
     <Link
       href={`/movies/${movie.id}`}
-      className="block group animate-fade-in transform transition-all duration-300 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background rounded-lg overflow-hidden"
+      className={cn(
+        "block group rounded-lg overflow-hidden focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background",
+        !disableHoverScale && "animate-fade-in transform transition-all duration-300 hover:scale-105 focus:scale-105"
+      )}
     >
       <Card className="h-full flex flex-col bg-card hover:shadow-xl transition-shadow duration-300">
         <CardHeader className="p-0 relative">

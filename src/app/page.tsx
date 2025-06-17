@@ -23,7 +23,8 @@ async function TopRatedMovies() {
     sort_by: 'rating', 
     limit: FEATURED_MOVIES_COUNT 
   });
-  return <MovieList movies={movieData.movies || []} itemsPerPage={FEATURED_MOVIES_COUNT} />;
+  // For marquee, pass marquee={true}
+  return <MovieList movies={movieData.movies || []} itemsPerPage={FEATURED_MOVIES_COUNT} marquee={true} />;
 }
 
 async function MovieResults({ query, page }: { query?: string; page?: string }) {
@@ -82,8 +83,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           Top Rated Movies
         </h2>
         <Suspense fallback={
-          <div className="flex flex-col justify-center items-center min-h-[200px]">
-            <MovieList loading={true} itemsPerPage={FEATURED_MOVIES_COUNT} />
+          <div className="flex overflow-hidden w-full py-4"> {/* Basic skeleton for marquee */}
+            {Array.from({ length: FEATURED_MOVIES_COUNT }).map((_, index) => (
+              <div key={index} className="flex-shrink-0 px-2">
+                <div className="w-48 md:w-56 h-[calc(var(--w-48)/2*3)] md:h-[calc(var(--w-56)/2*3)] animate-pulse bg-card rounded-lg shadow-md"></div>
+              </div>
+            ))}
           </div>
         }>
           <TopRatedMovies />
@@ -112,4 +117,3 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     </Container>
   );
 }
-
