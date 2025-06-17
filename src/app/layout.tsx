@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     locale: 'en_US',
     type: 'website',
   },
-  robots: { // Added for explicit control, ensuring no 'noindex'
+  robots: { 
     index: true,
     follow: true,
     googleBot: {
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  twitter: { // Example Twitter card metadata
+  twitter: { 
     card: 'summary_large_image',
     title: 'FlickFetch - Find Your Movies',
     description: 'Search, discover, and get details for your favorite movies.',
@@ -53,6 +53,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
+        <meta name="google-site-verification" content="0xXz9nuQRdoXfoVoNyZ1jIxLTYXELQLBAkmTJsYNQms" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
