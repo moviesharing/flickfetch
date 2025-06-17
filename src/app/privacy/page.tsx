@@ -2,6 +2,7 @@
 import type { Metadata } from 'next';
 import Container from '@/components/layout/container';
 import { Separator } from '@/components/ui/separator';
+import React from 'react'; // Import React for useEffect and useState
 
 export const metadata: Metadata = {
   title: 'Privacy Policy - FlickFetch',
