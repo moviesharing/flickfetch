@@ -1,13 +1,14 @@
+
 import type { YTSListMoviesResponse, YTSMovieDetailsResponse, Movie } from '@/types/yts';
 
 const YTS_API_BASE_URL = 'https://yts.mx/api/v2';
 
-interface SearchMoviesParams {
+export interface SearchMoviesParams {
   query_term?: string;
   genre?: string;
   sort_by?: string;
   quality?: string;
-  minimum_rating?: number;
+  minimum_rating?: number; // Changed from string to number for consistency with API
   limit?: number;
   page?: number;
 }
@@ -16,11 +17,20 @@ export async function searchMovies(params: SearchMoviesParams = {}): Promise<YTS
   const queryParams = new URLSearchParams();
   
   if (params.query_term) queryParams.append('query_term', params.query_term);
-  if (params.genre) queryParams.append('genre', params.genre);
+  
+  if (params.genre && params.genre !== 'all') queryParams.append('genre', params.genre);
+  
+  // Default sort_by handled by YTS API if not provided, or by caller logic.
+  // For 'list_movies.json', typical default is 'date_added'.
+  // Caller (e.g. homepage) can set specific defaults based on context (e.g. with/without query_term).
   if (params.sort_by) queryParams.append('sort_by', params.sort_by);
-  else queryParams.append('sort_by', 'download_count'); // Default sort
-  if (params.quality) queryParams.append('quality', params.quality);
-  if (params.minimum_rating) queryParams.append('minimum_rating', params.minimum_rating.toString());
+
+  if (params.quality && params.quality !== 'all') queryParams.append('quality', params.quality);
+  
+  if (params.minimum_rating && params.minimum_rating > 0) { // API uses 0-9; 0 is like 'all'.
+    queryParams.append('minimum_rating', params.minimum_rating.toString());
+  }
+  
   queryParams.append('limit', (params.limit || 20).toString());
   queryParams.append('page', (params.page || 1).toString());
 
@@ -36,7 +46,6 @@ export async function searchMovies(params: SearchMoviesParams = {}): Promise<YTS
     return data.data;
   } catch (error) {
     console.error('Error fetching movies from YTS:', error);
-    // Return a structure that indicates no movies or an error state
     return { movies: [], movie_count: 0, limit: params.limit || 20, page_number: params.page || 1 };
   }
 }
@@ -77,7 +86,7 @@ export async function getMovieSuggestions(movie_id: number): Promise<Movie[]> {
     if (!response.ok) {
       throw new Error(`YTS API request failed: ${response.statusText}`);
     }
-    const data: YTSListMoviesResponse = await response.json(); // Suggestions endpoint has similar structure to list_movies
+    const data: YTSListMoviesResponse = await response.json(); 
     if (data.status !== 'ok') {
       throw new Error(`YTS API error: ${data.status_message}`);
     }
@@ -102,3 +111,4 @@ export function generateMagnetLink(hash: string, title: string, trackers: string
   const trs = trackers.map(tracker => `&tr=${encodeURIComponent(tracker)}`).join('');
   return `magnet:?xt=urn:btih:${hash}&dn=${dn}${trs}`;
 }
+
