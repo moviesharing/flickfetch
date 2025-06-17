@@ -107,19 +107,10 @@ export default function PrivacyPolicyPage() {
 
         <Separator className="my-6" />
 
-        <section className="mb-6">
+        <section>
           <h2 className="text-2xl font-semibold mb-3">8. Changes to This Privacy Policy</h2>
           <p className="text-foreground leading-relaxed">
             We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date.
-          </p>
-        </section>
-
-        <Separator className="my-6" />
-
-        <section>
-          <h2 className="text-2xl font-semibold mb-3">9. Contact Us</h2>
-          <p className="text-foreground leading-relaxed">
-            If you have any questions about this Privacy Policy, please contact us at [Provide a placeholder contact method or state 'via our website' if no direct contact is set up yet].
           </p>
         </section>
       </div>

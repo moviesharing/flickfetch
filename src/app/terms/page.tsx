@@ -106,19 +106,10 @@ export default function TermsOfServicePage() {
 
         <Separator className="my-6" />
 
-        <section className="mb-6">
+        <section>
           <h2 className="text-2xl font-semibold mb-3">9. Governing Law</h2>
           <p className="text-foreground leading-relaxed">
             These Terms shall be governed and construed in accordance with the laws of the jurisdiction applicable to the operators of FlickFetch, without regard to its conflict of law provisions.
-          </p>
-        </section>
-
-        <Separator className="my-6" />
-
-        <section>
-          <h2 className="text-2xl font-semibold mb-3">10. Contact Us</h2>
-          <p className="text-foreground leading-relaxed">
-            If you have any questions about these Terms, please contact us at [Provide a placeholder contact method or state 'via our website' if no direct contact is set up yet].
           </p>
         </section>
       </div>
