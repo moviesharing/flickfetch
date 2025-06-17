@@ -13,6 +13,21 @@ export interface SearchMoviesParams {
   page?: number;
 }
 
+// Helper function to de-duplicate movies by ID
+function deduplicateMoviesById(movies: Movie[]): Movie[] {
+  if (!movies || movies.length === 0) {
+    return [];
+  }
+  const seenIds = new Set<number>();
+  return movies.filter(movie => {
+    if (seenIds.has(movie.id)) {
+      return false;
+    }
+    seenIds.add(movie.id);
+    return true;
+  });
+}
+
 export async function searchMovies(params: SearchMoviesParams = {}): Promise<YTSListMoviesResponse['data']> {
   const queryParams = new URLSearchParams();
   
@@ -20,14 +35,11 @@ export async function searchMovies(params: SearchMoviesParams = {}): Promise<YTS
   
   if (params.genre && params.genre !== 'all') queryParams.append('genre', params.genre);
   
-  // Default sort_by handled by YTS API if not provided, or by caller logic.
-  // For 'list_movies.json', typical default is 'date_added'.
-  // Caller (e.g. homepage) can set specific defaults based on context (e.g. with/without query_term).
   if (params.sort_by) queryParams.append('sort_by', params.sort_by);
 
   if (params.quality && params.quality !== 'all') queryParams.append('quality', params.quality);
   
-  if (params.minimum_rating && params.minimum_rating > 0) { // API uses 0-9; 0 is like 'all'.
+  if (params.minimum_rating && params.minimum_rating > 0) {
     queryParams.append('minimum_rating', params.minimum_rating.toString());
   }
   
@@ -42,6 +54,10 @@ export async function searchMovies(params: SearchMoviesParams = {}): Promise<YTS
     const data: YTSListMoviesResponse = await response.json();
     if (data.status !== 'ok') {
       throw new Error(`YTS API error: ${data.status_message}`);
+    }
+    // De-duplicate movies before returning
+    if (data.data && data.data.movies) {
+      data.data.movies = deduplicateMoviesById(data.data.movies);
     }
     return data.data;
   } catch (error) {
@@ -90,7 +106,12 @@ export async function getMovieSuggestions(movie_id: number): Promise<Movie[]> {
     if (data.status !== 'ok') {
       throw new Error(`YTS API error: ${data.status_message}`);
     }
-    return data.data.movies || [];
+    // De-duplicate movies before returning
+    let suggestedMovies = data.data.movies || [];
+    if (suggestedMovies.length > 0) {
+      suggestedMovies = deduplicateMoviesById(suggestedMovies);
+    }
+    return suggestedMovies;
   } catch (error) {
      console.error(`Error fetching movie suggestions for ID ${movie_id}:`, error);
     return [];
@@ -111,4 +132,3 @@ export function generateMagnetLink(hash: string, title: string, trackers: string
   const trs = trackers.map(tracker => `&tr=${encodeURIComponent(tracker)}`).join('');
   return `magnet:?xt=urn:btih:${hash}&dn=${dn}${trs}`;
 }
-
