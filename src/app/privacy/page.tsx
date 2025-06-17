@@ -1,9 +1,7 @@
-'use client';
 
 import type { Metadata } from 'next';
 import Container from '@/components/layout/container';
 import { Separator } from '@/components/ui/separator';
-import React from 'react'; 
 
 export const metadata: Metadata = {
   title: 'Privacy Policy - FlickFetch',
@@ -11,23 +9,17 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPolicyPage() {
-  const [lastUpdated, setLastUpdated] = React.useState('');
-  React.useEffect(() => {
-    setLastUpdated(new Date().toLocaleDateString());
-  }, []);
-
-
   return (
     <Container className="py-10">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold mb-6 font-headline">Privacy Policy</h1>
-        {lastUpdated && <p className="text-sm text-muted-foreground mb-8">Last Updated: {lastUpdated}</p>}
+        {/* Last Updated date removed to allow metadata export from Server Component */}
 
         <section className="mb-6">
           <h2 className="text-2xl font-semibold mb-3">1. Introduction</h2>
           <p className="text-foreground leading-relaxed">
             Welcome to FlickFetch ("we," "us," or "our"). We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and services.
-          </p>
+          </p>        
         </section>
 
         <Separator className="my-6" />

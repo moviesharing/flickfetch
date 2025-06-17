@@ -1,9 +1,7 @@
-'use client';
 
 import type { Metadata } from 'next';
 import Container from '@/components/layout/container';
 import { Separator } from '@/components/ui/separator';
-import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Terms of Service - FlickFetch',
@@ -11,16 +9,11 @@ export const metadata: Metadata = {
 };
 
 export default function TermsOfServicePage() {
-  const [lastUpdated, setLastUpdated] = React.useState('');
-  React.useEffect(() => {
-    setLastUpdated(new Date().toLocaleDateString());
-  }, []);
-
   return (
     <Container className="py-10">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold mb-6 font-headline">Terms of Service</h1>
-        {lastUpdated && <p className="text-sm text-muted-foreground mb-8">Last Updated: {lastUpdated}</p>}
+        {/* Last Updated date removed to allow metadata export from Server Component */}
 
         <section className="mb-6">
           <h2 className="text-2xl font-semibold mb-3">1. Acceptance of Terms</h2>
@@ -82,7 +75,7 @@ export default function TermsOfServicePage() {
         </section>
 
         <Separator className="my-6" />
-
+        
         <section className="mb-6">
           <h2 className="text-2xl font-semibold mb-3">6. Limitation of Liability</h2>
           <p className="text-foreground leading-relaxed">
