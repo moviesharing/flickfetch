@@ -109,7 +109,7 @@ export default function TermsOfServicePage() {
         <section className="mb-6">
           <h2 className="text-2xl font-semibold mb-3">9. Governing Law</h2>
           <p className="text-foreground leading-relaxed">
-            These Terms shall be governed and construed in accordance with the laws of [Specify Jurisdiction, e.g., "your country/state"], without regard to its conflict of law provisions.
+            These Terms shall be governed and construed in accordance with the laws of the jurisdiction applicable to the operators of FlickFetch, without regard to its conflict of law provisions.
           </p>
         </section>
 
