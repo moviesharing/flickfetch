@@ -53,7 +53,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
-        <meta name="google-site-verification" content="0xXz9nuQRdoXfoVoNyZ1jIxLTYXELQLBAkmTJsYNQms" />
+        <meta name="google-site-verification" content="2pxjTV45j7AirwFXd2ZZDXarXGt1nZMGPG5vAkRNCjI" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
