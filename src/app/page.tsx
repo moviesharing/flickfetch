@@ -1,11 +1,12 @@
+
 import Container from '@/components/layout/container';
 import MovieList from '@/components/movie/movie-list';
 import SearchBar from '@/components/movie/search-bar';
 import { searchMovies } from '@/lib/yts';
-import type { Movie } from '@/types/yts';
 import { Separator } from '@/components/ui/separator';
 import { Suspense } from 'react';
 import LoadingSpinner from '@/components/shared/loading-spinner';
+import PaginationControls from '@/components/movie/pagination-controls';
 
 interface HomePageProps {
   searchParams?: {
@@ -14,16 +15,37 @@ interface HomePageProps {
   };
 }
 
+const MOVIES_PER_PAGE = 24;
+
 async function MovieResults({ query, page }: { query?: string; page?: string }) {
   const currentPage = page ? parseInt(page, 10) : 1;
   const movieData = await searchMovies({ 
     query_term: query, 
-    limit: 24, 
+    limit: MOVIES_PER_PAGE, 
     page: currentPage,
-    sort_by: query ? 'like_count' : 'download_count' // Popular for search, trending for initial
+    sort_by: query ? 'like_count' : 'download_count'
   });
   
-  return <MovieList movies={movieData.movies || []} />;
+  const totalMovies = movieData.movie_count || 0;
+  const totalPages = Math.ceil(totalMovies / MOVIES_PER_PAGE);
+  // Ensure page_number from API is used for accurate hasNextPage/hasPrevPage
+  const apiCurrentPage = movieData.page_number || currentPage; 
+  const hasNextPage = apiCurrentPage < totalPages;
+  const hasPrevPage = apiCurrentPage > 1;
+
+  return (
+    <>
+      <MovieList movies={movieData.movies || []} itemsPerPage={MOVIES_PER_PAGE} />
+      {totalPages > 0 && ( // Show pagination only if there are results
+        <PaginationControls
+          currentPage={apiCurrentPage}
+          totalPages={totalPages}
+          hasNextPage={hasNextPage}
+          hasPrevPage={hasPrevPage}
+        />
+      )}
+    </>
+  );
 }
 
 
@@ -51,20 +73,18 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           {query ? `Search Results for "${query}"` : "Popular Movies"}
         </h2>
         <Suspense fallback={
-          <div className="flex justify-center items-center min-h-[300px]">
-            <LoadingSpinner size={48} />
+          <div className="flex flex-col justify-center items-center min-h-[300px]">
+            <MovieList loading={true} itemsPerPage={MOVIES_PER_PAGE} />
+            <div className="flex items-center justify-center space-x-4 py-8">
+              <div className="h-9 w-28 bg-muted rounded-md animate-pulse"></div>
+              <div className="h-6 w-24 bg-muted rounded-md animate-pulse"></div>
+              <div className="h-9 w-24 bg-muted rounded-md animate-pulse"></div>
+            </div>
           </div>
         }>
           <MovieResults query={query} page={page} />
         </Suspense>
       </section>
-      
-      {/* Basic Pagination (can be improved) */}
-      {/* This part requires client-side interaction for router.push or Link, 
-          or a more complex server-side pagination strategy. 
-          For simplicity, this example doesn't implement full pagination controls.
-          A real app might use a client component for pagination controls.
-      */}
     </Container>
   );
 }
