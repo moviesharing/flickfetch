@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { generateMovieSlug } from '@/lib/utils'; // Import the slug generator
 
 interface MovieCardProps {
   movie: Movie;
@@ -12,9 +13,11 @@ interface MovieCardProps {
 }
 
 export default function MovieCard({ movie, disableHoverScale = false }: MovieCardProps) {
+  const slug = generateMovieSlug(movie.title, movie.year, movie.id);
+
   return (
     <Link
-      href={`/movies/${movie.id}`}
+      href={`/movies/${slug}`} // Use the generated slug
       className={cn(
         "block group rounded-lg overflow-hidden focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background",
         !disableHoverScale && "animate-fade-in transform transition-all duration-300 hover:scale-105 focus:scale-105"
