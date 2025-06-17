@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer'; // Added Footer import
+import AdUnit from '@/components/ads/ad-unit'; // Import AdUnit
 
 export const metadata: Metadata = {
   title: 'FlickFetch - Find Your Movies',
@@ -25,6 +26,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased min-h-screen flex flex-col bg-background text-foreground">
         <Header />
+        <AdUnit /> {/* Site-wide ad unit below header */}
         <main className="flex-grow">
           {children}
         </main>

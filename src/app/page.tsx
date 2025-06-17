@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Suspense } from 'react';
 import LoadingSpinner from '@/components/shared/loading-spinner';
 import PaginationControls from '@/components/movie/pagination-controls';
+import AdUnit from '@/components/ads/ad-unit'; // Import AdUnit
 
 export const runtime = 'edge';
 
@@ -156,6 +157,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       <SearchBar />
       <FilterBar />
+      <AdUnit /> {/* Ad unit below filter bar */}
       
       <Separator className="my-8" />
 

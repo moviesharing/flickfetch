@@ -5,7 +5,6 @@ import { getMovieDetails, getMovieSuggestions, searchMovies } from '@/lib/yts';
 import Container from '@/components/layout/container';
 import TorrentTable from '@/components/movie/torrent-table';
 import MovieList from '@/components/movie/movie-list';
-// Removed SeoOptimizer import
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Star, Clock, CalendarDays, Users, Languages } from 'lucide-react';
@@ -15,6 +14,7 @@ import LoadingSpinner from '@/components/shared/loading-spinner';
 import { notFound } from 'next/navigation';
 import { YtsMovie } from '@/types/yts';
 import { generateMovieSlug } from '@/lib/utils';
+import AdUnit from '@/components/ads/ad-unit'; // Import AdUnit
 
 export const runtime = 'edge';
 
@@ -31,8 +31,6 @@ async function MovieSuggestions({ movieId }: { movieId: number }) {
   }
   return <MovieList movies={suggestions} />;
 }
-
-// Removed generateStaticParams as it's incompatible with runtime = 'edge'
 
 export default async function MovieDetailsPage({ params }: MovieDetailsPageProps) {
   const slug = params.slug;
@@ -177,6 +175,8 @@ export default async function MovieDetailsPage({ params }: MovieDetailsPageProps
           )}
         </div>
       </div>
+      
+      <AdUnit /> {/* Ad unit after movie details block */}
 
       <Separator className="my-8 md:my-12" />
 
@@ -184,13 +184,6 @@ export default async function MovieDetailsPage({ params }: MovieDetailsPageProps
         <h2 className="text-2xl md:text-3xl font-semibold mb-6 font-headline">Available Torrents</h2>
         <TorrentTable torrents={movie.torrents} movieTitle={movie.title_long} />
       </section>
-
-      {/* Removed SeoOptimizer section */}
-      {/* <Separator className="my-8 md:my-12" />
-      
-      <section className="mb-10">
-        <SeoOptimizer movie={movie} />
-      </section> */}
 
       <Separator className="my-8 md:my-12" />
 
