@@ -9,11 +9,19 @@ export const metadata: Metadata = {
 };
 
 export default function PrivacyPolicyPage() {
+  // Get current date for "Last Updated"
+  // This must be done client-side to avoid hydration mismatch.
+  const [lastUpdated, setLastUpdated] = React.useState('');
+  React.useEffect(() => {
+    setLastUpdated(new Date().toLocaleDateString());
+  }, []);
+
+
   return (
     <Container className="py-10">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold mb-6 font-headline">Privacy Policy</h1>
-        <p className="text-sm text-muted-foreground mb-8">Last Updated: {new Date().toLocaleDateString()}</p>
+        {lastUpdated && <p className="text-sm text-muted-foreground mb-8">Last Updated: {lastUpdated}</p>}
 
         <section className="mb-6">
           <h2 className="text-2xl font-semibold mb-3">1. Introduction</h2>
@@ -34,14 +42,11 @@ export default function PrivacyPolicyPage() {
               <strong>Search Queries:</strong> When you search for movies, we process your query terms to fetch results from the YTS.mx API. These queries are not stored in a way that personally identifies you.
             </li>
             <li>
-              <strong>AI SEO Generator Inputs:</strong> If you use the AI SEO Description Generator, the movie details you provide (title, genre, actors, plot summary) are sent to our AI service provider (Google AI via Genkit) to generate the description. This data is processed according to Google's AI terms and privacy policies. We do not store these inputs persistently on our servers after the generation process.
-            </li>
-            <li>
               <strong>Technical Data:</strong> Like most websites, we may automatically collect certain information when you visit, such as your IP address (which may be logged by our hosting provider for security and operational purposes), browser type, and operating system. This data is used for analytics and to ensure the proper functioning of our service.
             </li>
           </ul>
           <p className="text-foreground leading-relaxed mt-2">
-            We do not require user registration and do not knowingly collect personally identifiable information (PII) beyond what is technically necessary for the site's operation or explicitly provided by you for a specific feature like the AI generator.
+            We do not require user registration and do not knowingly collect personally identifiable information (PII) beyond what is technically necessary for the site's operation.
           </p>
         </section>
 
@@ -55,7 +60,6 @@ export default function PrivacyPolicyPage() {
           <ul className="list-disc list-inside space-y-2 text-foreground">
             <li>Provide, operate, and maintain our website and services.</li>
             <li>Fulfill your search requests and display movie information.</li>
-            <li>Enable the functionality of the AI SEO Description Generator.</li>
             <li>Improve our website and services by analyzing usage patterns (on an aggregated, non-identifiable basis).</li>
             <li>Ensure the security and integrity of our platform.</li>
           </ul>
@@ -72,8 +76,8 @@ export default function PrivacyPolicyPage() {
             <li>
               <strong>YTS.mx API:</strong> Movie data and torrent information are fetched from the YTS.mx API. Your interactions related to fetching this data are subject to YTS.mx's terms and privacy policy.
             </li>
-            <li>
-              <strong>Google AI (via Genkit):</strong> The AI SEO Description Generator uses Google's AI models. Data provided to this feature is processed by Google. We recommend reviewing Google's relevant privacy policies.
+             <li>
+              <strong>Advertising:</strong> We use third-party advertising services (e.g., A-ADS) to display ads on our website. These services may use cookies or other tracking technologies to collect information about your visits to this and other websites to provide relevant advertisements. Please refer to the privacy policies of these advertising providers for more information on their data collection practices.
             </li>
           </ul>
         </section>
@@ -83,7 +87,7 @@ export default function PrivacyPolicyPage() {
         <section className="mb-6">
           <h2 className="text-2xl font-semibold mb-3">5. Cookies</h2>
           <p className="text-foreground leading-relaxed">
-            FlickFetch may use essential cookies for basic site functionality (e.g., session management). We do not use cookies for tracking or advertising purposes. You can manage cookie preferences through your browser settings.
+            FlickFetch may use essential cookies for basic site functionality (e.g., session management). Third-party services, such as our advertising partners, may also use cookies. You can manage cookie preferences through your browser settings.
           </p>
         </section>
 

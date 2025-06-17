@@ -34,9 +34,6 @@ export default function AboutPage() {
             <li>
               <strong>Movie Suggestions:</strong> Discover new films based on movies you're interested in, powered by smart suggestions from the YTS.mx API.
             </li>
-            <li>
-              <strong>AI-Powered SEO Descriptions:</strong> Utilize our cutting-edge AI tool to generate SEO-friendly movie descriptions, perfect for content creators and enthusiasts.
-            </li>
           </ul>
         </section>
 

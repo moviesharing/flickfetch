@@ -30,8 +30,7 @@ const nextConfig: NextConfig = {
         stream: false,
         net: false,
         tls: false,
-        // Optional dependency from OpenTelemetry that might be causing issues
-        '@opentelemetry/exporter-jaeger': false, 
+        // '@opentelemetry/exporter-jaeger': false, // Removed as Genkit and its tracing are removed
       };
     }
 
