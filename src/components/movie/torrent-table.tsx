@@ -1,11 +1,12 @@
+
 'use client';
 
 import type { Torrent } from '@/types/yts';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Copy, Download, TrendingUp, Users } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Magnet, Download, TrendingUp, Users } from 'lucide-react'; // Changed Copy to Magnet
 import { generateMagnetLink } from '@/lib/yts';
+// import { useToast } from '@/hooks/use-toast'; // Removed useToast as it's no longer needed
 
 interface TorrentTableProps {
   torrents: Torrent[];
@@ -13,26 +14,10 @@ interface TorrentTableProps {
 }
 
 export default function TorrentTable({ torrents, movieTitle }: TorrentTableProps) {
-  const { toast } = useToast();
+  // const { toast } = useToast(); // Removed toast setup
 
-  const handleCopyMagnet = (hash: string) => {
-    const magnetLink = generateMagnetLink(hash, movieTitle);
-    navigator.clipboard.writeText(magnetLink)
-      .then(() => {
-        toast({
-          title: "Copied to clipboard!",
-          description: "Magnet link copied successfully.",
-        });
-      })
-      .catch(err => {
-        console.error('Failed to copy magnet link: ', err);
-        toast({
-          title: "Error",
-          description: "Failed to copy magnet link.",
-          variant: "destructive",
-        });
-      });
-  };
+  // Removed handleCopyMagnet function as it's replaced by direct link opening
+  // const handleCopyMagnet = (hash: string) => { ... };
 
   if (!torrents || torrents.length === 0) {
     return <p className="text-muted-foreground">No torrents available for this movie.</p>;
@@ -62,14 +47,16 @@ export default function TorrentTable({ torrents, movieTitle }: TorrentTableProps
               <TableCell className="text-right">
                 <div className="flex gap-2 justify-end">
                   <Button
+                    asChild // Use asChild to render the <a> tag with button styling
                     variant="outline"
                     size="sm"
-                    onClick={() => handleCopyMagnet(torrent.hash)}
-                    title="Copy Magnet Link"
-                    aria-label={`Copy magnet link for ${movieTitle} ${torrent.quality}`}
+                    title="Open Magnet Link" // Updated title
+                    aria-label={`Open magnet link for ${movieTitle} ${torrent.quality}`} // Updated aria-label
                   >
-                    <Copy className="h-4 w-4 mr-2" />
-                    Magnet
+                    <a href={generateMagnetLink(torrent.hash, movieTitle)}>
+                      <Magnet className="h-4 w-4 mr-2" /> {/* Changed icon to Magnet */}
+                      Magnet
+                    </a>
                   </Button>
                    <Button 
                     variant="outline"
