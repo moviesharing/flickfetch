@@ -55,7 +55,7 @@ export default async function MovieDetailsPage({ params }: MovieDetailsPageProps
 
   if (searchResults.movies && searchResults.movies.length > 0) {
     // Find the best match: requires matching year and a reasonably similar slugified title
-    const targetSlugForComparison = generateMovieSlug(potentialTitleSearch, yearToMatch);
+    // const targetSlugForComparison = generateMovieSlug(potentialTitleSearch, yearToMatch);
 
     for (const searchedMovie of searchResults.movies) {
       if (searchedMovie.year === yearToMatch) {
