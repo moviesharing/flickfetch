@@ -1,8 +1,9 @@
+'use client';
 
 import type { Metadata } from 'next';
 import Container from '@/components/layout/container';
 import { Separator } from '@/components/ui/separator';
-import React from 'react'; // Import React for useEffect and useState
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'Terms of Service - FlickFetch',
@@ -10,8 +11,6 @@ export const metadata: Metadata = {
 };
 
 export default function TermsOfServicePage() {
-  // Get current date for "Last Updated"
-  // This must be done client-side to avoid hydration mismatch.
   const [lastUpdated, setLastUpdated] = React.useState('');
   React.useEffect(() => {
     setLastUpdated(new Date().toLocaleDateString());
