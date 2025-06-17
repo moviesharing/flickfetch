@@ -10,7 +10,17 @@ export default function Header() {
           <Film className="h-8 w-8 text-primary" />
           <span className="font-headline">FlickFetch</span>
         </Link>
-        {/* Navigation links can be added here if needed */}
+        <div>
+          <a
+            id="frame-link"
+            href="https://aads.com/campaigns/new/?source_id=2399071&source_type=ad_unit&partner=2399071"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-muted-foreground hover:text-primary transition-colors px-3 py-2 rounded-md hover:bg-accent/50"
+          >
+            Advertise here
+          </a>
+        </div>
       </Container>
     </header>
   );
