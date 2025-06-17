@@ -12,11 +12,10 @@ export default function Header() {
         </Link>
         <div>
           <a
-            id="frame-link"
             href="https://aads.com/campaigns/new/?source_id=2399071&source_type=ad_unit&partner=2399071"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-muted-foreground hover:text-primary transition-colors px-3 py-2 rounded-md hover:bg-accent/50"
+            className="inline-block px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           >
             Advertise here
           </a>
