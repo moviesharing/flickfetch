@@ -9,6 +9,8 @@ import { Suspense } from 'react';
 import LoadingSpinner from '@/components/shared/loading-spinner';
 import PaginationControls from '@/components/movie/pagination-controls';
 
+export const runtime = 'edge';
+
 interface HomePageProps {
   searchParams?: {
     query?: string;
