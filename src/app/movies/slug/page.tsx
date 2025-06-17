@@ -34,14 +34,14 @@ export default async function MovieDetailsPage({ params }: MovieDetailsPageProps
 
   // Attempt to parse year and title from slug (e.g., "some-movie-title-2023")
   const slugParts = slug.split('-');
-  const potentialYearString = slugParts.pop(); // Last part might be year
+  const potentialYear = slugParts.pop(); // Last part might be year
   const potentialTitleSearch = slugParts.join(' '); // Remainder might be title
 
-  if (!potentialYearString || isNaN(parseInt(potentialYearString, 10))) {
+  if (!potentialYear || isNaN(parseInt(potentialYear, 10))) {
     console.error('Could not parse year from slug:', slug);
     notFound();
   }
-  const yearToMatch = parseInt(potentialYearString, 10);
+  const yearToMatch = parseInt(potentialYear, 10);
 
   if (!potentialTitleSearch) {
     console.error('Could not parse title from slug:', slug);
@@ -49,7 +49,7 @@ export default async function MovieDetailsPage({ params }: MovieDetailsPageProps
   }
 
   // Search for movies based on the title part of the slug
-  const searchResults = await searchMovies({ query_term: potentialTitleSearch, limit: 10, sort_by: 'year' }); // Sort by year to prioritize release year matches
+  const searchResults = await searchMovies({ query_term: potentialTitleSearch, limit: 10 });
 
   let foundMovieId: number | null = null;
 
@@ -58,36 +58,35 @@ export default async function MovieDetailsPage({ params }: MovieDetailsPageProps
     for (const searchedMovie of searchResults.movies) {
       if (searchedMovie.year === yearToMatch) {
         // Further refine by comparing slugified version of API title with input slug
-        const searchedMovieSlug = generateMovieSlug(searchedMovie.title_english || searchedMovie.title, searchedMovie.year);
-        
-        // Check if the current movie's slug (generated from its title_english or title) matches the input slug
-        if (searchedMovieSlug === slug) {
+        const searchedMovieSlug = generateMovieSlug(searchedMovie.title, searchedMovie.year);
+        // This comparison needs to be somewhat tolerant to minor variations if API title isn't exact
+        if (searchedMovieSlug.includes(slugParts.join('-')) || slug.includes(generateMovieSlug(searchedMovie.title_english, searchedMovie.year))) {
+           // Prioritize exact slug match if possible
+           if (searchedMovieSlug === slug) {
             foundMovieId = searchedMovie.id;
-            break; // Exact match found
-        }
-        // Fallback if no exact match yet, take the first one that matches year and part of the title
-        if (!foundMovieId) {
-          // This simple includes check can be prone to errors if titles are substrings of each other.
-          // A more sophisticated matching (e.g., Levenshtein distance) could be used if needed.
-          if (slug.startsWith(slugParts.join('-'))) { // Check if the main title part matches
-             foundMovieId = searchedMovie.id;
-          }
+            break;
+           }
+           // Fallback to first match if no exact slug match
+           if (!foundMovieId) {
+            foundMovieId = searchedMovie.id;
+           }
         }
       }
     }
-    // If after specific checks, no movie is found, but we have results,
-    // and the first one matches the year, consider it (as a broader fallback).
-    // This is less reliable.
+     // If after checking specific year matches, still no foundMovieId,
+     // and we have results, take the first result if its year matches.
+     // This is a broader fallback.
     if (!foundMovieId && searchResults.movies[0]?.year === yearToMatch) {
-        const firstResultSlug = generateMovieSlug(searchResults.movies[0].title_english || searchResults.movies[0].title, searchResults.movies[0].year);
-        if(firstResultSlug.includes(slugParts.join('-'))) { // check if slug is similar enough
-            // foundMovieId = searchResults.movies[0].id; // Be cautious with this fallback
+        const firstResultSlug = generateMovieSlug(searchResults.movies[0].title, searchResults.movies[0].year);
+        // Check if the first result's slug is reasonably close to the input slug
+        if(firstResultSlug.includes(slugParts.join('-'))) {
+            foundMovieId = searchResults.movies[0].id;
         }
     }
   }
 
   if (!foundMovieId) {
-    console.warn(`No definitive matching movie found for slug: ${slug} (parsed title: "${potentialTitleSearch}", year: ${yearToMatch})`);
+    console.warn(`No matching movie found for slug: ${slug} (parsed title: "${potentialTitleSearch}", year: ${yearToMatch})`);
     notFound();
   }
 
@@ -97,16 +96,6 @@ export default async function MovieDetailsPage({ params }: MovieDetailsPageProps
     notFound();
   }
   
-  // Final check: if the fetched movie's slug doesn't reasonably match the input slug, it might be the wrong movie.
-  const currentMovieSlug = generateMovieSlug(movie.title_english || movie.title, movie.year);
-  if (currentMovieSlug !== slug) {
-    // This indicates a mismatch. It's possible the search logic picked a movie that shares the same year
-    // and a similar title start, but isn't an exact title match.
-    // Depending on strictness, you might call notFound() here.
-    // For now, we proceed, but this could be a point of refinement.
-    console.warn(`Fetched movie slug "${currentMovieSlug}" does not exactly match requested slug "${slug}".`);
-  }
-
   return (
     <Container className="py-6 md:py-10">
       <div className="mb-6">

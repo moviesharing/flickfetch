@@ -151,9 +151,12 @@ export default function FilterBar() {
       current.delete('query'); // Year query overrides general text query from main search bar
     } else {
       current.delete('year_query');
-      // If year input is cleared but sort_by was 'year', it just sorts by year generally.
-      // No need to change sort_by here as it's handled by its own dropdown.
-      // If yearVal is empty and user explicitly set sort_by to 'year', it will sort all movies by year.
+      // If year input is cleared and sort_by was 'year',
+      // revert sort_by to a sensible default like 'download_count' if no other sort is active
+      // or if no query exists. Otherwise, let existing sort_by (if any) persist.
+      if (current.get('sort_by') === 'year' && !yearVal) {
+         current.set('sort_by', 'download_count'); // Or some other default
+      }
     }
     current.delete('page');
     const search = current.toString();
@@ -215,7 +218,7 @@ export default function FilterBar() {
             placeholder="YYYY"
             value={yearInputValue}
             onChange={handleYearInputChange}
-            onBlur={handleYearInputSubmit}
+            onBlur={handleYearInputSubmit} // Submit on blur
             onKeyDown={(e) => { 
               if (e.key === 'Enter') { 
                 e.preventDefault(); 

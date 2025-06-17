@@ -38,7 +38,7 @@ export async function searchMovies(params: SearchMoviesParams = {}): Promise<YTS
     const yearNum = parseInt(params.year_query, 10);
     // Basic validation for a 4-digit year
     if (!isNaN(yearNum) && params.year_query.length === 4) {
-      effectiveQueryTerm = params.year_query; // Year query takes precedence
+      effectiveQueryTerm = params.year_query; // Year query takes precedence for the API query_term
     }
   }
   
@@ -46,6 +46,8 @@ export async function searchMovies(params: SearchMoviesParams = {}): Promise<YTS
   
   if (params.genre && params.genre !== 'all') queryParams.append('genre', params.genre);
   
+  // Always append sort_by if provided, even if it's 'year' with year_query.
+  // The API might use sort_by in conjunction with query_term (which might be the year).
   if (params.sort_by) queryParams.append('sort_by', params.sort_by);
 
   if (params.quality && params.quality !== 'all') queryParams.append('quality', params.quality);
@@ -95,7 +97,9 @@ export async function getMovieDetails(params: GetMovieDetailsParams): Promise<Mo
     }
     const data: YTSMovieDetailsResponse = await response.json();
      if (data.status !== 'ok' || !data.data.movie) {
-      throw new Error(`YTS API error: ${data.status_message} or movie not found.`);
+      // Consider it not found if status is not 'ok' or movie object is missing
+      console.warn(`Movie details not found or API error for ID ${params.movie_id}: ${data.status_message}`);
+      return null; 
     }
     return data.data.movie;
   } catch (error) {

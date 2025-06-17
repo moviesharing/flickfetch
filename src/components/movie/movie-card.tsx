@@ -14,7 +14,7 @@ interface MovieCardProps {
 }
 
 export default function MovieCard({ movie, disableHoverScale = false }: MovieCardProps) {
-  const slug = generateMovieSlug(movie.title, movie.year); // Use title and year for slug
+  const slug = generateMovieSlug(movie.title_english || movie.title, movie.year);
 
   return (
     <Link

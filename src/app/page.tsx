@@ -39,7 +39,7 @@ async function MovieResults({
   genre, 
   minimum_rating, 
   sort_by,
-  year_query, // Added for specific year query
+  year_query,
 }: { 
   query?: string; 
   page?: string;
@@ -47,15 +47,15 @@ async function MovieResults({
   genre?: string;
   minimum_rating?: string;
   sort_by?: string;
-  year_query?: string; // Added for specific year query
+  year_query?: string;
 }) {
   const currentPage = page ? parseInt(page, 10) : 1;
   
   const searchOptions: SearchMoviesParams = {
-    query_term: query,
+    query_term: query, // This might be overridden by year_query in searchMovies
     limit: MOVIES_PER_PAGE,
     page: currentPage,
-    year_query: year_query, // Pass year_query
+    year_query: year_query, 
   };
 
   if (quality && quality !== 'all') searchOptions.quality = quality;
@@ -67,19 +67,19 @@ async function MovieResults({
     }
   }
   
-  // Determine sort_by:
-  // If year_query is present, sort_by is 'year' (set by FilterBar).
-  // Else, use sort_by from filter if present.
-  // Else, if query term exists, use 'like_count'.
-  // Else (no query, no filter sort_by), use 'download_count' (default for popular).
+  // Determine sort_by for the API call.
+  // If year_query is present and sort_by is 'year', this is handled.
+  // Otherwise, use sort_by from filter if present.
+  // If no specific sort_by from filter, and a query term exists (not year_query related), use 'like_count'.
+  // Default (no query, no filter sort_by) is 'download_count'.
   if (year_query && sort_by === 'year') {
-    searchOptions.sort_by = 'year'; // Already set by filter bar, but good to be explicit
+    searchOptions.sort_by = 'year'; 
   } else if (sort_by) {
     searchOptions.sort_by = sort_by;
-  } else if (query) {
+  } else if (query) { // query here means non-year specific query
     searchOptions.sort_by = 'like_count';
   } else {
-    searchOptions.sort_by = 'download_count';
+    searchOptions.sort_by = 'download_count'; // Default for popular movies list
   }
   
   const movieData = await searchMovies(searchOptions);
@@ -112,14 +112,22 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const quality = searchParams?.quality;
   const genre = searchParams?.genre;
   const minimum_rating = searchParams?.minimum_rating;
-  const sort_by = searchParams?.sort_by;
-  const year_query = searchParams?.year_query; // Read year_query
+  let sort_by = searchParams?.sort_by; // Make it let to potentially adjust
+  const year_query = searchParams?.year_query;
 
-  // Determine if any filters are actively applied, including the new year_query
+  // If year_query is active, ensure sort_by reflects 'year'
+  if (year_query && (!sort_by || sort_by !== 'year')) {
+    sort_by = 'year';
+  }
+
+
+  // Determine if any filters are actively applied
   const hasGeneralFilters = quality || genre || (minimum_rating && minimum_rating !== '0');
-  const hasSortFilter = sort_by && sort_by !== 'download_count'; // if default sort_by is not considered 'active filter' for title
-  const hasYearQueryFilter = sort_by === 'year' && year_query;
-  const hasFiltersApplied = hasGeneralFilters || hasSortFilter || hasYearQueryFilter;
+  const hasYearQueryFilter = !!year_query; // True if year_query has a value
+  // A sort_by is considered an "active filter" if it's not the default 'download_count' OR if a year_query is active (which forces sort by year)
+  const hasActiveSortFilter = (sort_by && sort_by !== 'download_count') || hasYearQueryFilter;
+  
+  const hasFiltersApplied = hasGeneralFilters || hasActiveSortFilter;
 
 
   // Determine results heading
@@ -128,7 +136,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     resultsTitle = `Movies from ${year_query}`;
   } else if (query) {
     resultsTitle = `Search Results for "${query}"`;
-  } else if (hasFiltersApplied) { // Covers general filters or non-default sort
+  } else if (hasFiltersApplied) { 
     resultsTitle = "Filtered Movies";
   }
 
@@ -192,8 +200,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             quality={quality}
             genre={genre}
             minimum_rating={minimum_rating}
-            sort_by={sort_by}
-            year_query={year_query} // Pass year_query
+            sort_by={sort_by} // Use the potentially adjusted sort_by
+            year_query={year_query}
           />
         </Suspense>
       </section>
