@@ -46,10 +46,6 @@ export default function Footer() {
             </Link>
           </div>
         </div>
-        <div className="text-center text-xs mt-8 pt-4 border-t border-border/50">
-          <p>FlickFetch is a movie discovery tool and does not host any files. All torrents are provided by YTS.mx.</p>
-          <p>Please respect copyright laws in your country.</p>
-        </div>
       </Container>
     </footer>
   );
