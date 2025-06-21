@@ -9,6 +9,7 @@ import { Suspense } from 'react';
 import LoadingSpinner from '@/components/shared/loading-spinner';
 import PaginationControls from '@/components/movie/pagination-controls';
 import AdUnit from '@/components/ads/ad-unit'; // Import AdUnit
+import VpnAffiliateAd from '@/components/ads/VpnAffiliateAd';
 
 export const runtime = 'edge';
 
@@ -180,6 +181,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               <TopRatedMovies />
             </Suspense>
           </section>
+          
+          <VpnAffiliateAd />
+
           <Separator className="my-8" />
         </>
       )}

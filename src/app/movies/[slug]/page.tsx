@@ -15,6 +15,7 @@ import { notFound } from 'next/navigation';
 import { YtsMovie } from '@/types/yts';
 import { generateMovieSlug } from '@/lib/utils';
 import AdUnit from '@/components/ads/ad-unit'; // Import AdUnit
+import VpnAffiliateAd from '@/components/ads/VpnAffiliateAd';
 
 export const runtime = 'edge';
 
@@ -177,6 +178,10 @@ export default async function MovieDetailsPage({ params }: MovieDetailsPageProps
       </div>
       
       <AdUnit /> {/* Ad unit after movie details block */}
+      
+      <Separator className="my-8 md:my-12" />
+
+      <VpnAffiliateAd />
 
       <Separator className="my-8 md:my-12" />
 
